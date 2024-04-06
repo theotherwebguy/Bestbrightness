@@ -1,117 +1,61 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, { useState } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { SafeAreaView, View, StyleSheet } from 'react-native';
+import LoginScreen from './src/screens/Auth/Login';
+import SignUpScreen from './src/screens/Auth/SignUp';
+import TabbedDashboard from './src/screens//tabs/TabbedDashboard'; // Import TabbedDashboard component
+import DashboardScreen from './src/screens/tabs/DashboardScreen';
+import InventoryScreen from './src/screens/tabs/InventoryScreen';
+import StockMovementScreen from './src/screens/tabs/StockMovementScreen';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+const Stack = createStackNavigator();
+const Tab = createBottomTabNavigator();
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+function AuthStack({ setIsLoggedIn }: { setIsLoggedIn: (isLoggedIn: boolean) => void }) {
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
+    <Stack.Navigator initialRouteName='Login' screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Login">
+        {(props) => <LoginScreen {...props} setIsLoggedIn={setIsLoggedIn} />}
+      </Stack.Screen>
+      <Stack.Screen name="SignUp" component={SignUpScreen} />
+    </Stack.Navigator>
   );
 }
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+function MainApp() {
+  return (
+    <Tab.Navigator>
+      <Tab.Screen name="Dashboard" component={DashboardScreen} />
+      <Tab.Screen name="Stock Movement" component={StockMovementScreen} />
+      <Tab.Screen name="Inventory" component={InventoryScreen} />
+    </Tab.Navigator>
+  );
+}
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Function to change isLoggedIn state upon successful login
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true);
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <NavigationContainer>
+      {isLoggedIn ? (
+        <MainApp /> // Render TabbedDashboard if logged in
+      ) : (
+        <AuthStack setIsLoggedIn={setIsLoggedIn} /> // Pass setIsLoggedIn as a prop
+      )}
+    </NavigationContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
+  container: {
+    flex: 1,
   },
 });
 
