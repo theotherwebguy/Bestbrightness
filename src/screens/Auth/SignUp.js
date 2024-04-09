@@ -10,7 +10,7 @@ const SignUpScreen = ({ navigation }) => {
   const handleSignUp = async () => {
     try {
       // Send a POST request to the backend API with username and password
-      const response = await axios.post('http:///192.168.26.52:3000/register', {
+      const response = await axios.post('http://172.30.192.1:3000/register', {
         username,
         password,
       });

@@ -9,7 +9,7 @@ const LoginScreen = ({ navigation, setIsLoggedIn }) => {
   const handleLogin = async () => {
     try {
       // Send a POST request to the backend API with username and password
-      const response = await axios.post('http://192.168.26.52:3000/login', {
+      const response = await axios.post('http://172.30.192.1:3000/login', {
         username,
         password,
       });

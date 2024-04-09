@@ -81,6 +81,26 @@ app.post('/login', async (req, res) => {
   }
 });
 
+// add new product route
+require('./models/Product')
+const Product = mongoose.model('Product')
+
+// Define add product route
+app.post('/add-product', async (req, res) => {
+  const { title, description, quantity, enteredTime } = req.body;
+
+  try {
+    // Create new product
+    const newProduct = new Product({ title, description, quantity, enteredTime });
+    await newProduct.save();
+
+    res.status(201).json({ message: 'Product added successfully' });
+  } catch (error) {
+    console.error('Error adding product:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 
 // Function to get the IP address
 function getIPAddress() {

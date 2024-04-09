@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Button, FlatList, TouchableOpacity, StyleSheet, Modal, TextInput, Dimensions } from 'react-native';
-import { launchCamera } from 'react-native-image-picker';
-
+import axios from 'axios';
 
 const { width } = Dimensions.get('window');
 
@@ -11,29 +10,33 @@ const InventoryScreen = () => {
   const [description, setDescription] = useState('');
   const [quantity, setQuantity] = useState('');
 
-  const handleQuickAdd = () => {
-    launchCamera({ mediaType: 'photo' }, (response) => {
-      if (!response.didCancel && !response.errorCode) {
-        console.log('Image captured:', response);
-      }
-    });
-  };
+  const handleAddNewItem = async () => {
+    const enteredTime = new Date(); // Get current time
+    console.log('Adding new item:', title, description, quantity, enteredTime);
 
-  const handleAddNewItem = () => {
-    console.log('Adding new item:', title, description, quantity);
-    setModalVisible(false);
+    try {
+      // Send data to server using Axios
+      const response = await axios.post('http://172.30.192.1:3000/add-product', {
+        title: title,
+        description: description,
+        quantity: quantity,
+        enteredTime: enteredTime,
+      });
+      console.log('Success:', response.data);
+      setModalVisible(false); // Close the modal after successful submission
+    } catch (error) {
+      console.error('Error:', error);
+    }
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.buttonContainer}>
         <View style={styles.button}>
-          {/* <Button title="Add New" onPress={() => setModalVisible(true)} /> */}
           <TouchableOpacity style={styles.button} onPress={() => setModalVisible(true)}>
-           <Text style={styles.buttonText}>Add New</Text>
+            <Text style={styles.buttonText}>Add New</Text>
           </TouchableOpacity>
         </View>
-
       </View>
 
       <FlatList
@@ -86,21 +89,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    // alignItems: 'center',
     marginBottom: 20,
   },
   button: {
-    width: '80%',
+    width: '40%',
     height: 40,
     backgroundColor: '#052560',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 5,
+    marginHorizontal: 5,
   },
   buttonText: {
     color: '#ffffff',
@@ -137,13 +139,6 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 5,
     padding: 10,
-  },
-  modalButton: {
-    backgroundColor: '#052560',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 5,
-    height: 40,
   },
 });
 
