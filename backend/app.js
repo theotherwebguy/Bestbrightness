@@ -30,6 +30,8 @@ const User = mongoose.model('UserInfo')
 app.get('/', (req, res) => {
     res.send({status: 'connectted'})
 });
+
+// Register route
 app.post('/register',async (req, res) => {
     
     try {
@@ -53,11 +55,10 @@ app.post('/register',async (req, res) => {
       }
 });
 
-// login API
+
 // Define login route
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
-  
 
   try {
     // Check if the user exists in the database

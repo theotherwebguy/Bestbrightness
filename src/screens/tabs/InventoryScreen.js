@@ -1,44 +1,52 @@
 import React, { useState } from 'react';
-import { View, Text, Button, FlatList, StyleSheet, Modal, TextInput } from 'react-native';
-import { launchCamera } from 'react-native-image-picker'; // Import launchCamera function from react-native-image-picker
+import { View, Text, Button, FlatList, TouchableOpacity, StyleSheet, Modal, TextInput, Dimensions } from 'react-native';
+import { launchCamera } from 'react-native-image-picker';
+
+
+const { width } = Dimensions.get('window');
 
 const InventoryScreen = () => {
-  const [modalVisible, setModalVisible] = useState(false); // State to control the visibility of the modal
-  const [title, setTitle] = useState(''); // State to capture item title in modal
-  const [description, setDescription] = useState(''); // State to capture item description in modal
-  const [quantity, setQuantity] = useState(''); // State to capture item quantity in modal
+  const [modalVisible, setModalVisible] = useState(false);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [quantity, setQuantity] = useState('');
 
-  // Function to handle opening camera for quick add
   const handleQuickAdd = () => {
-    // Implement camera capture functionality using react-native-image-picker library
     launchCamera({ mediaType: 'photo' }, (response) => {
       if (!response.didCancel && !response.errorCode) {
-        // Image captured successfully, you can handle further processing here
         console.log('Image captured:', response);
       }
     });
   };
 
-  // Function to handle adding new item via modal
   const handleAddNewItem = () => {
-    // Implement functionality to add new item here
     console.log('Adding new item:', title, description, quantity);
-    // Close modal after adding item
     setModalVisible(false);
   };
 
   return (
     <View style={styles.container}>
-      {/* Horizontal buttons */}
       <View style={styles.buttonContainer}>
-        <Button title="Add New" onPress={() => setModalVisible(true)} />
-        <Button title="Quick Add" onPress={handleQuickAdd} />
+        <View style={styles.button}>
+          {/* <Button title="Add New" onPress={() => setModalVisible(true)} /> */}
+          <TouchableOpacity style={styles.button} onPress={() => setModalVisible(true)}>
+           <Text style={styles.buttonText}>Add New</Text>
+          </TouchableOpacity>
+        </View>
+
       </View>
 
-      {/* FlatList of inventory items */}
-      {/* Display inventory items here */}
+      <FlatList
+        data={[]} // Add your inventory items data here
+        renderItem={({ item }) => (
+          <View style={styles.item}>
+            <Text>{item.title}</Text>
+            {/* Display other item details as needed */}
+          </View>
+        )}
+        keyExtractor={(item, index) => index.toString()}
+      />
 
-      {/* Modal for adding new item */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -78,11 +86,32 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    
   },
   buttonContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
+    // alignItems: 'center',
     marginBottom: 20,
+  },
+  button: {
+    width: '80%',
+    height: 40,
+    backgroundColor: '#052560',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: '#ffffff',
+    fontSize: 16,
+  },
+  item: {
+    marginBottom: 10,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
   },
   modalContainer: {
     flex: 1,
@@ -91,6 +120,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
+    width: width - 40, // Full screen width minus padding
     backgroundColor: '#fff',
     padding: 20,
     borderRadius: 10,
@@ -107,6 +137,13 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 5,
     padding: 10,
+  },
+  modalButton: {
+    backgroundColor: '#052560',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 5,
+    height: 40,
   },
 });
 
