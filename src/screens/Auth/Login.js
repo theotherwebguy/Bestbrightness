@@ -2,22 +2,36 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import axios from 'axios';
 
-const LoginScreen = ({ navigation, setIsLoggedIn }) => {
+const LoginScreen = ({ navigation, setIsLoggedIn, setUserData }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = async () => {
     try {
       // Send a POST request to the backend API with username and password
-      const response = await axios.post('http://172.30.192.1:3000/login', {
+      const response = await axios.post('http://192.168.21.159:3000/login', {
         username,
         password,
       });
 
       // Check if login was successful
       if (response.status === 200) {
+        // Extract user data from the response
+        const { id, name, surname } = response.data.user;
+
+        // Set user data in state
+        setUserData({ id, name, surname });
+
         // Set isLoggedIn to true upon successful login
         setIsLoggedIn(true);
+        
+        // Log all user information extracted
+        console.log('User Data:', { id, name, surname });
+
+        // Display all user information extracted
+        Alert.alert('User Information', `ID: ${id}, Name: ${name}, Surname: ${surname}`);
+
+        // Navigate to the desired screen
         // navigation.navigate('TabbedDashboard');
       } else {
         // Handle login error

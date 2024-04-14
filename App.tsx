@@ -1,33 +1,38 @@
+
 import React, { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaView, View, StyleSheet } from 'react-native';
+import axios from 'axios';
 import LoginScreen from './src/screens/Auth/Login';
 import SignUpScreen from './src/screens/Auth/SignUp';
-import TabbedDashboard from './src/screens//tabs/TabbedDashboard'; // Import TabbedDashboard component
 import DashboardScreen from './src/screens/tabs/DashboardScreen';
 import InventoryScreen from './src/screens/tabs/InventoryScreen';
 import StockMovementScreen from './src/screens/tabs/StockMovementScreen';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
-function AuthStack({ setIsLoggedIn }: { setIsLoggedIn: (isLoggedIn: boolean) => void }) {
+function AuthStack({ setIsLoggedIn, setUserData }: 
+  { setIsLoggedIn: (isLoggedIn: boolean) => void; setUserData: (data: any) => void }) {
   return (
     <Stack.Navigator initialRouteName='Login' screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Login">
-        {(props) => <LoginScreen {...props} setIsLoggedIn={setIsLoggedIn} />}
+        {(props) => <LoginScreen {...props} setIsLoggedIn={setIsLoggedIn} setUserData={setUserData} />}
       </Stack.Screen>
       <Stack.Screen name="SignUp" component={SignUpScreen} />
     </Stack.Navigator>
   );
 }
 
-function MainApp() {
+function MainApp({ userData }) {
   return (
     <Tab.Navigator>
-      <Tab.Screen name="Dashboard" component={DashboardScreen} />
+      <Tab.Screen name="Dashboard">
+        {(props) => <DashboardScreen {...props} userData={userData} />}
+      </Tab.Screen>
       <Tab.Screen name="Stock Movement" component={StockMovementScreen} />
       <Tab.Screen name="Inventory" component={InventoryScreen} />
     </Tab.Navigator>
@@ -36,20 +41,18 @@ function MainApp() {
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  // Function to change isLoggedIn state upon successful login
-  const handleLoginSuccess = () => {
-    setIsLoggedIn(true);
-  };
+  const [userData, setUserData] = useState(null);
 
   return (
-    <NavigationContainer>
-      {isLoggedIn ? (
-        <MainApp /> // Render TabbedDashboard if logged in
-      ) : (
-        <AuthStack setIsLoggedIn={setIsLoggedIn} /> // Pass setIsLoggedIn as a prop
-      )}
-    </NavigationContainer>
+    <GestureHandlerRootView>
+      <NavigationContainer>
+        {isLoggedIn ? (
+          <MainApp userData={userData} />
+        ) : (
+          <AuthStack setIsLoggedIn={setIsLoggedIn} setUserData={setUserData} />
+        )}
+      </NavigationContainer>
+    </GestureHandlerRootView>
   );
 }
 
