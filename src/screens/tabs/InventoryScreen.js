@@ -5,7 +5,7 @@ import { Swipeable } from 'react-native-gesture-handler';
 
 const { width } = Dimensions.get('window');
 
-const InventoryScreen = () => {
+const InventoryScreen = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [updateModalVisible, setUpdateModalVisible] = useState(false);
   const [title, setTitle] = useState('');
@@ -15,13 +15,16 @@ const InventoryScreen = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const flatListRef = useRef(null);
 
+  // New state variable to track selected items
+  const [selectedItems, setSelectedItems] = useState([]);
+
   useEffect(() => {
     fetchProducts();
   }, []);
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('http://192.168.21.159:3000/products');
+      const response = await axios.get('http://172.20.48.1:3000/products');
       setProducts(response.data);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -33,7 +36,7 @@ const InventoryScreen = () => {
     console.log('Adding new item:', title, description, quantity, enteredTime);
 
     try {
-      const response = await axios.post('http://192.168.21.159:3000/add-product', {
+      const response = await axios.post('http://172.20.48.1:3000/add-product', {
         title,
         description,
         quantity,
@@ -55,7 +58,7 @@ const InventoryScreen = () => {
     if (!selectedProduct) return;
 
     try {
-      const response = await axios.put(`http://192.168.21.159:3000/products/${selectedProduct._id}`, {
+      const response = await axios.put(`http://172.20.48.1:3000/products/${selectedProduct._id}`, {
         title,
         description,
         quantity,
@@ -71,13 +74,32 @@ const InventoryScreen = () => {
 
   const handleDeleteItem = async (productId) => {
     try {
-      await axios.delete(`http://192.168.21.159:3000/products/${productId}`);
+      await axios.delete(`http://172.20.48.1:3000/products/${productId}`);
       console.log('Product deleted successfully:', productId);
       fetchProducts(); // Refresh products list
     } catch (error) {
       console.error('Error deleting product:', error);
     }
   };
+
+  // New function to handle selecting items
+  const handleSelectItem = (item) => {
+    // Check if the item is already selected
+    const isSelected = selectedItems.some((selectedItem) => selectedItem._id === item._id);
+
+    if (isSelected) {
+      // If item is already selected, remove it from the selected items
+      setSelectedItems((prevSelectedItems) => prevSelectedItems.filter((selectedItem) => selectedItem._id !== item._id));
+    } else {
+      // If item is not selected, add it to the selected items
+      setSelectedItems((prevSelectedItems) => [...prevSelectedItems, item]);
+    }
+  };
+  
+    // New function to navigate to the stock movement screen with selected items
+    const navigateToStockMovement = () => {
+      navigation.navigate('StockMovementScreen', { selectedItems });
+    };
 
   const renderItem = ({ item }) => (
     <Swipeable 
@@ -112,6 +134,11 @@ const InventoryScreen = () => {
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button} onPress={() => setModalVisible(true)}>
           <Text style={styles.buttonText}>Add New</Text>
+        </TouchableOpacity>
+
+         {/* New button to move selected items to the stock movement screen */}
+         <TouchableOpacity style={styles.button} onPress={navigateToStockMovement}>
+            <Text style={styles.buttonText}>Pick Stock</Text>
         </TouchableOpacity>
       </View>
 
@@ -153,7 +180,7 @@ const InventoryScreen = () => {
           </View>
         </View>
       </Modal>
-
+    
       <Modal
         animationType="slide"
         transparent={true}

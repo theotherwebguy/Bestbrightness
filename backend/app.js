@@ -61,7 +61,7 @@ app.post('/login', async (req, res) => {
 
   try {
     // Check if the user exists in the database
-    const user = await User.findOne({ username: username });
+    const user = await User.findOne({ username });
 
         // Log the retrieved user object
         console.log('Retrieved User:', user);
