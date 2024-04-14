@@ -33,7 +33,12 @@ function MainApp({ userData }) {
       <Tab.Screen name="Dashboard">
         {(props) => <DashboardScreen {...props} userData={userData} />}
       </Tab.Screen>
-      <Tab.Screen name="Stock Movement" component={StockMovementScreen} />
+      <Tab.Screen 
+        name="Stock Movement" 
+        options={{ tabBarLabel: 'Stock Movement' }}
+      >
+        {(props) => <StockMovementScreen {...props} />}
+      </Tab.Screen>
       <Tab.Screen name="Inventory" component={InventoryScreen} />
     </Tab.Navigator>
   );

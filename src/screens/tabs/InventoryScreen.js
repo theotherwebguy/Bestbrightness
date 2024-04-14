@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, Button, FlatList, TouchableOpacity, StyleSheet, Modal, TextInput, Dimensions } from 'react-native';
 import axios from 'axios';
 import { Swipeable } from 'react-native-gesture-handler';
-
+import StockMovementScreen from './StockMovementScreen';
 const { width } = Dimensions.get('window');
 
 const InventoryScreen = ({ navigation }) => {
@@ -97,9 +97,10 @@ const InventoryScreen = ({ navigation }) => {
   };
   
     // New function to navigate to the stock movement screen with selected items
-    const navigateToStockMovement = () => {
-      navigation.navigate('StockMovementScreen', { selectedItems });
-    };
+
+const navigateToStockMovement = () => {
+  navigation.navigate('Stock Movement', { selectedItems });
+};
 
   const renderItem = ({ item }) => (
     <Swipeable 
@@ -118,9 +119,9 @@ const InventoryScreen = ({ navigation }) => {
       )}
     >
       <TouchableOpacity
-        style={styles.item}
-        onPress={() => setSelectedProduct(item)}
-        activeOpacity={0.8}
+      style={[styles.item, selectedItems.some((selectedItem) => selectedItem._id === item._id) && styles.selectedItem]}
+      onPress={() => handleSelectItem(item)}
+      activeOpacity={0.8}
       >
         <Text style={styles.title}>{item.title}</Text>
         <Text style={styles.description}>{item.description}</Text>
@@ -305,6 +306,9 @@ const styles = StyleSheet.create({
   updateButtonText: {
     color: 'white',
     fontWeight: 'bold',
+  },
+  selectedItem: {
+    backgroundColor: 'lightblue', // Example background color for selected item
   },
 });
 
