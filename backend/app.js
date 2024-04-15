@@ -55,7 +55,7 @@ app.post('/register', async (req, res) => {
 
 
 // Define login route
-// Define login route
+
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
@@ -126,7 +126,7 @@ app.get('/products', async (req, res) => {
       setTimeout(async () => {
         const products = await Product.find();
         res.json(products);
-      }, 1000); // Polling interval: 5 seconds
+      }, 10); // Polling interval: 5 seconds
     } else {
       // Normal request, respond immediately with the current data
       const products = await Product.find();
@@ -141,7 +141,7 @@ app.get('/products', async (req, res) => {
 // Define route to update a product
 app.put('/products/:id', async (req, res) => {
   const productId = req.params.id;
-  const { title, description, quantity, enteredTime } = req.body;
+  const { title, description, quantity, enteredTime, pickupTime, deliveredTime} = req.body;
 
   try {
       // Find the product by ID and update its fields
@@ -149,7 +149,9 @@ app.put('/products/:id', async (req, res) => {
           title,
           description,
           quantity,
-          enteredTime
+          enteredTime,
+          pickupTime,
+          deliveredTime
       }, { new: true });
 
       if (!updatedProduct) {
@@ -160,6 +162,21 @@ app.put('/products/:id', async (req, res) => {
   } catch (error) {
       console.error('Error updating product:', error);
       res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Define route to get a product with ID
+app.get('/products/:id', async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+    res.json(product);
+  } catch (error) {
+    console.error('Error fetching product by ID:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

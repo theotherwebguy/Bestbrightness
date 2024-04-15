@@ -3,12 +3,13 @@ import React, { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { SafeAreaView, View, StyleSheet } from 'react-native';
+import { SafeAreaView, View, StyleSheet, Image } from 'react-native';
 import axios from 'axios';
 import LoginScreen from './src/screens/Auth/Login';
 import SignUpScreen from './src/screens/Auth/SignUp';
 import DashboardScreen from './src/screens/tabs/DashboardScreen';
 import InventoryScreen from './src/screens/tabs/InventoryScreen';
+import DeliveredScreen from './src/screens/tabs/DeliveredScreen';
 import StockMovementScreen from './src/screens/tabs/StockMovementScreen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -30,16 +31,49 @@ function AuthStack({ setIsLoggedIn, setUserData }:
 function MainApp({ userData }) {
   return (
     <Tab.Navigator>
-      <Tab.Screen name="Dashboard">
+      <Tab.Screen name="Dashboard"              
+            options={{
+            tabBarIcon: ({ color, size }) => (
+              <Image
+                source={require('C:/Users/NdlelaM/Documents/App/Bestbrightness/assets/dashboard_icon.png')}
+                style={{ tintColor: color, width: size, height: size }}
+              />
+            ),
+          }}>
         {(props) => <DashboardScreen {...props} userData={userData} />}
       </Tab.Screen>
+      <Tab.Screen name="Inventory" 
+            options={{
+            tabBarIcon: ({ color, size }) => (
+              <Image
+                source={require('C:/Users/NdlelaM/Documents/App/Bestbrightness/assets/inventory_icon.png')}
+                style={{ tintColor: color, width: size, height: size }}
+              />
+            ),
+          }} component={InventoryScreen} />
       <Tab.Screen 
         name="Stock Movement" 
-        options={{ tabBarLabel: 'Stock Movement' }}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Image
+              source={require('C:/Users/NdlelaM/Documents/App/Bestbrightness/assets/stock_movement_icon.png')}
+              style={{ tintColor: color, width: size, height: size }}
+            />
+          ),
+        }}
       >
         {(props) => <StockMovementScreen {...props} />}
       </Tab.Screen>
-      <Tab.Screen name="Inventory" component={InventoryScreen} />
+      <Tab.Screen name="Delivere Items"
+          options={{
+            tabBarIcon: ({ color, size }) => (
+              <Image
+                source={require('C:/Users/NdlelaM/Documents/App/Bestbrightness/assets/delivered_items_icon.png')}
+                style={{ tintColor: color, width: size, height: size }}
+              />
+            ),
+          }}
+       component={DeliveredScreen} />
     </Tab.Navigator>
   );
 }

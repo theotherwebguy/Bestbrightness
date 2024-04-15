@@ -1,7 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 
 const StockMovementScreen = ({ route }) => {
+
+  useEffect(() => {
+    console.log('Params in StockMovementScreen:', route.params);
+  }, []);
+
   // Check if route object or selectedItems is undefined
   if (!route || !route.params || !route.params.selectedItems) {
     return (
@@ -20,6 +25,7 @@ const StockMovementScreen = ({ route }) => {
       <Text style={styles.title}>{item.title}</Text>
       <Text style={styles.description}>{item.description}</Text>
       <Text style={styles.quantity}>Quantity: {item.quantity}</Text>
+      <Text style={styles.pickupTime}>Pickup Time: {item.pickupTime ? new Date(item.pickupTime).toLocaleString() : 'Not Picked Up'}</Text>
     </View>
   );
 

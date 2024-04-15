@@ -20,6 +20,11 @@ const InventoryScreen = ({ navigation }) => {
 
   useEffect(() => {
     fetchProducts();
+
+    return () => {
+      setSelectedItems([]);
+    };
+
   }, []);
 
   const fetchProducts = async () => {
@@ -96,11 +101,35 @@ const InventoryScreen = ({ navigation }) => {
     }
   };
   
-    // New function to navigate to the stock movement screen with selected items
 
-const navigateToStockMovement = () => {
-  navigation.navigate('Stock Movement', { selectedItems });
-};
+  const handlePickStock = async () => {
+    // Update pickup time for each selected item
+    selectedItems.forEach(async (item) => {
+      try {
+        const currentTime = new Date();
+        console.log(currentTime);
+        await axios.put(`http://172.20.48.1:3000/products/${item._id}`, {
+          pickupTime: currentTime,
+        });
+      } catch (error) {
+        console.error('Error updating pickup time:', error);
+      }
+    });
+  
+    // Force refresh by refetching the data from the server
+    fetchProducts();
+  
+    // Update selectedItems with the latest data
+    const updatedSelectedItems = selectedItems.map((item) => {
+      return {
+        ...item,
+        pickupTime: new Date().toISOString(), // Assuming pickupTime is updated to current time
+      };
+    });
+  
+    // Navigate to StockMovementScreen with updated selectedItems data
+    navigation.navigate('Stock Movement', { selectedItems: updatedSelectedItems });
+  };
 
   const renderItem = ({ item }) => (
     <Swipeable 
@@ -137,8 +166,7 @@ const navigateToStockMovement = () => {
           <Text style={styles.buttonText}>Add New</Text>
         </TouchableOpacity>
 
-         {/* New button to move selected items to the stock movement screen */}
-         <TouchableOpacity style={styles.button} onPress={navigateToStockMovement}>
+         <TouchableOpacity style={styles.button} onPress={handlePickStock}>
             <Text style={styles.buttonText}>Pick Stock</Text>
         </TouchableOpacity>
       </View>
