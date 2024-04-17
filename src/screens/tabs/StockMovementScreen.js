@@ -2,12 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Button } from 'react-native';
 
 const StockMovementScreen = ({ route, navigation }) => {
+  // New state to manage selected items
   const [selectedItems, setSelectedItems] = useState(route.params.selectedItems.map(item => ({ ...item, selected: false })));
 
   useEffect(() => {
-    console.log('Params in StockMovementScreen:', route.params);
-  }, []);
+    // Check if there are selectedItems passed as route params
+    if (route.params && route.params.selectedItems) {
+      // Initialize selectedItems state with the selected items passed from InventoryScreen
+      setSelectedItems(route.params.selectedItems.map(item => ({ ...item, selected: false })));
+    }
+  }, [route.params]);
 
+  // Function to toggle item selection
   const toggleSelectItem = (itemId) => {
     const updatedItems = selectedItems.map(item => {
       if (item._id === itemId) {
@@ -18,22 +24,18 @@ const StockMovementScreen = ({ route, navigation }) => {
     setSelectedItems(updatedItems);
   };
 
+  // Function to handle delivery of selected items
   const handleDeliver = async () => {
     // Filter selected items
     const deliveredItems = selectedItems.filter(item => item.selected);
 
-    // Navigate to DeliveredScreen with selected items data
+    // Remove delivered items from selectedItems state
+    const updatedItems = selectedItems.filter(item => !item.selected);
+    setSelectedItems(updatedItems);
+
+    // Navigate to DeliverItemsScreen with selected items data
     navigation.navigate('Delivere Items', { deliveredItems });
   };
-
-  // Check if route object or selectedItems is undefined
-  if (!route || !route.params || !route.params.selectedItems) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.heading}>No items selected</Text>
-      </View>
-    );
-  }
 
   // Render function for each item in the FlatList
   const renderItem = ({ item }) => (
@@ -53,9 +55,11 @@ const StockMovementScreen = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
+      {/* New button container */}
       <View style={styles.buttonContainer}>
         <Button title="Deliver" color="#052560" onPress={handleDeliver} />
       </View>
+      {/* Old code: heading and FlatList for selected items */}
       <Text style={styles.heading}>Selected Items</Text>
       <FlatList
         data={selectedItems}
@@ -83,7 +87,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#052560', // Green color for deliver button
     justifyContent: 'center',
     alignItems: 'center',
-
   },
   item: {
     marginBottom: 10,
@@ -108,23 +111,6 @@ const styles = StyleSheet.create({
   },
   selectedItem: {
     backgroundColor: 'lightblue', // Example background color for selected item
-  },
-  buttonText: {
-    color: '#ffffff',
-    fontSize: 16,
-  },
-  deliverButton: {
-    width: '40%',
-    height: 40,
-    backgroundColor: '#052560', // Same background color as the Pick Stock button
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 5,
-    marginHorizontal: 5,
-  },
-  deliverButtonText: {
-    color: '#ffffff', // White text color
-    fontSize: 16,
   },
 });
 
