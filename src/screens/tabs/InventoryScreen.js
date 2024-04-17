@@ -44,7 +44,7 @@ const InventoryScreen = ({ navigation }) => {
       const response = await axios.post('http://172.20.208.1:3000/add-product', {
         title,
         description,
-        quantity,
+        quantity: parseInt(quantity),
         enteredTime,
       });
 
