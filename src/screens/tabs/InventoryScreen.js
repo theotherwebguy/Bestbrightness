@@ -29,7 +29,7 @@ const InventoryScreen = ({ navigation }) => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('http://172.20.48.1:3000/products');
+      const response = await axios.get('http://172.20.208.1:3000/products');
       setProducts(response.data);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -41,7 +41,7 @@ const InventoryScreen = ({ navigation }) => {
     console.log('Adding new item:', title, description, quantity, enteredTime);
 
     try {
-      const response = await axios.post('http://172.20.48.1:3000/add-product', {
+      const response = await axios.post('http://172.20.208.1:3000/add-product', {
         title,
         description,
         quantity,
@@ -63,7 +63,7 @@ const InventoryScreen = ({ navigation }) => {
     if (!selectedProduct) return;
 
     try {
-      const response = await axios.put(`http://172.20.48.1:3000/products/${selectedProduct._id}`, {
+      const response = await axios.put(`http://172.20.208.1:3000/products/${selectedProduct._id}`, {
         title,
         description,
         quantity,
@@ -79,7 +79,7 @@ const InventoryScreen = ({ navigation }) => {
 
   const handleDeleteItem = async (productId) => {
     try {
-      await axios.delete(`http://172.20.48.1:3000/products/${productId}`);
+      await axios.delete(`http://172.20.208.1:3000/products/${productId}`);
       console.log('Product deleted successfully:', productId);
       fetchProducts(); // Refresh products list
     } catch (error) {
@@ -108,7 +108,7 @@ const InventoryScreen = ({ navigation }) => {
       try {
         const currentTime = new Date();
         console.log(currentTime);
-        await axios.put(`http://172.20.48.1:3000/products/${item._id}`, {
+        await axios.put(`http://172.20.208.1:3000/products/${item._id}`, {
           pickupTime: currentTime,
         });
       } catch (error) {

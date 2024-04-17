@@ -9,7 +9,7 @@ const LoginScreen = ({ navigation, setIsLoggedIn, setUserData }) => {
   const handleLogin = async () => {
     try {
       // Send a POST request to the backend API with username and password
-      const response = await axios.post('http://172.20.48.1:3000/login', {
+      const response = await axios.post('http://172.20.208.1:3000/login', {
         username,
         password,
       });
@@ -28,14 +28,10 @@ const LoginScreen = ({ navigation, setIsLoggedIn, setUserData }) => {
         // Log all user information extracted
         console.log('User Data:', { id, name, surname });
 
-        // Display all user information extracted
-        Alert.alert('User Information', `ID: ${id}, Name: ${name}, Surname: ${surname}`);
-
         // Navigate to the desired screen
         // navigation.navigate('TabbedDashboard');
       } else {
-        // Handle login error
-        console.error('Error logging in:', response.data.message);
+        
         Alert.alert('Error', response.data.message || 'Failed to login. Please try again.');
       }
     } catch (error) {
