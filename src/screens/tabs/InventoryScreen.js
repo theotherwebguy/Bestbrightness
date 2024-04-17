@@ -128,27 +128,34 @@ const InventoryScreen = ({ navigation }) => {
   };
 
   // Function to confirm picking stock
-// Function to confirm picking stock
-const confirmPickStock = async () => {
-  // Update quantity in the database
-  try {
-    // Iterate through selected items and update the quantity
-    for (const item of selectedItems) {
-      const updatedQuantity = item.quantity - pickedQuantity;
-      await axios.put(`http://172.20.208.1:3000/products/${item._id}`, {
-        quantity: updatedQuantity,
-      });
+  const confirmPickStock = async () => {
+    // Check if picked quantity is greater than available stock
+    const totalAvailableStock = selectedItems.reduce((total, item) => total + item.quantity, 0);
+    if (pickedQuantity > totalAvailableStock) {
+      // Notify user and return
+      alert("Entered quantity exceeds available stock. Please enter a number below or equal to the available stock.");
+      return;
     }
-    // Refresh products list
-    fetchProducts();
-    // Navigate to StockMovementScreen with updated selectedItems data
-    navigation.navigate('Stock Movement', { selectedItems });
-    // Close the modal
-    setPickStockModalVisible(false);
-  } catch (error) {
-    console.error('Error updating quantity:', error);
-  }
-};
+  
+    // Update quantity in the database
+    try {
+      // Iterate through selected items and update the quantity
+      for (const item of selectedItems) {
+        const updatedQuantity = item.quantity - pickedQuantity;
+        await axios.put(`http://172.20.208.1:3000/products/${item._id}`, {
+          quantity: updatedQuantity,
+        });
+      }
+      // Refresh products list
+      fetchProducts();
+      // Navigate to StockMovementScreen with updated selectedItems data
+      navigation.navigate('Stock Movement', { selectedItems });
+      // Close the modal
+      setPickStockModalVisible(false);
+    } catch (error) {
+      console.error('Error updating quantity:', error);
+    }
+  };
 
   // Function to render each item
   const renderItem = ({ item }) => (
