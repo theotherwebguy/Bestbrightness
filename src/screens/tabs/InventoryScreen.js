@@ -1,3 +1,4 @@
+// Import useState, useEffect, useRef, Modal, TextInput, and Button
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, Button, FlatList, TouchableOpacity, StyleSheet, Modal, TextInput, Dimensions } from 'react-native';
 import axios from 'axios';
@@ -18,15 +19,20 @@ const InventoryScreen = ({ navigation }) => {
   // New state variable to track selected items
   const [selectedItems, setSelectedItems] = useState([]);
 
+  // New state variables for pick stock modal
+  const [pickStockModalVisible, setPickStockModalVisible] = useState(false);
+  const [pickedQuantity, setPickedQuantity] = useState('');
+
+  // useEffect hook to fetch products
   useEffect(() => {
     fetchProducts();
 
     return () => {
       setSelectedItems([]);
     };
-
   }, []);
 
+  // Function to fetch products
   const fetchProducts = async () => {
     try {
       const response = await axios.get('http://172.20.208.1:3000/products');
@@ -36,9 +42,9 @@ const InventoryScreen = ({ navigation }) => {
     }
   };
 
+  // Function to handle adding new item
   const handleAddNewItem = async () => {
     const enteredTime = new Date(); // Get current time
-    console.log('Adding new item:', title, description, quantity, enteredTime);
 
     try {
       const response = await axios.post('http://172.20.208.1:3000/add-product', {
@@ -59,6 +65,7 @@ const InventoryScreen = ({ navigation }) => {
     }
   };
 
+  // Function to handle updating item
   const handleUpdateItem = async () => {
     if (!selectedProduct) return;
 
@@ -77,6 +84,7 @@ const InventoryScreen = ({ navigation }) => {
     }
   };
 
+  // Function to handle deleting item
   const handleDeleteItem = async (productId) => {
     try {
       await axios.delete(`http://172.20.208.1:3000/products/${productId}`);
@@ -87,7 +95,7 @@ const InventoryScreen = ({ navigation }) => {
     }
   };
 
-  // New function to handle selecting items
+  // Function to handle selecting items
   const handleSelectItem = (item) => {
     // Check if the item is already selected
     const isSelected = selectedItems.some((selectedItem) => selectedItem._id === item._id);
@@ -100,14 +108,13 @@ const InventoryScreen = ({ navigation }) => {
       setSelectedItems((prevSelectedItems) => [...prevSelectedItems, item]);
     }
   };
-  
 
+  // Function to handle picking stock
   const handlePickStock = async () => {
     // Update pickup time for each selected item
     selectedItems.forEach(async (item) => {
       try {
         const currentTime = new Date();
-        console.log(currentTime);
         await axios.put(`http://172.20.208.1:3000/products/${item._id}`, {
           pickupTime: currentTime,
         });
@@ -115,30 +122,43 @@ const InventoryScreen = ({ navigation }) => {
         console.error('Error updating pickup time:', error);
       }
     });
-  
-    // Force refresh by refetching the data from the server
-    fetchProducts();
-  
-    // Update selectedItems with the latest data
-    const updatedSelectedItems = selectedItems.map((item) => {
-      return {
-        ...item,
-        pickupTime: new Date().toISOString(), // Assuming pickupTime is updated to current time
-      };
-    });
-  
-    // Navigate to StockMovementScreen with updated selectedItems data
-    navigation.navigate('Stock Movement', { selectedItems: updatedSelectedItems });
+
+    // Show pick stock modal
+    setPickStockModalVisible(true);
   };
 
+  // Function to confirm picking stock
+// Function to confirm picking stock
+const confirmPickStock = async () => {
+  // Update quantity in the database
+  try {
+    // Iterate through selected items and update the quantity
+    for (const item of selectedItems) {
+      const updatedQuantity = item.quantity - pickedQuantity;
+      await axios.put(`http://172.20.208.1:3000/products/${item._id}`, {
+        quantity: updatedQuantity,
+      });
+    }
+    // Refresh products list
+    fetchProducts();
+    // Navigate to StockMovementScreen with updated selectedItems data
+    navigation.navigate('Stock Movement', { selectedItems });
+    // Close the modal
+    setPickStockModalVisible(false);
+  } catch (error) {
+    console.error('Error updating quantity:', error);
+  }
+};
+
+  // Function to render each item
   const renderItem = ({ item }) => (
-    <Swipeable 
+    <Swipeable
       renderLeftActions={() => (
         <TouchableOpacity style={styles.updateButton} onPress={() => {
           setSelectedProduct(item);
           setUpdateModalVisible(true);
         }}>
-            <Text style={styles.updateButtonText}>Update</Text>
+          <Text style={styles.updateButtonText}>Update</Text>
         </TouchableOpacity>
       )}
       renderRightActions={() => (
@@ -148,9 +168,9 @@ const InventoryScreen = ({ navigation }) => {
       )}
     >
       <TouchableOpacity
-      style={[styles.item, selectedItems.some((selectedItem) => selectedItem._id === item._id) && styles.selectedItem]}
-      onPress={() => handleSelectItem(item)}
-      activeOpacity={0.8}
+        style={[styles.item, selectedItems.some((selectedItem) => selectedItem._id === item._id) && styles.selectedItem]}
+        onPress={() => handleSelectItem(item)}
+        activeOpacity={0.8}
       >
         <Text style={styles.title}>{item.title}</Text>
         <Text style={styles.description}>{item.description}</Text>
@@ -166,8 +186,8 @@ const InventoryScreen = ({ navigation }) => {
           <Text style={styles.buttonText}>Add New</Text>
         </TouchableOpacity>
 
-         <TouchableOpacity style={styles.button} onPress={handlePickStock}>
-            <Text style={styles.buttonText}>Pick Stock</Text>
+        <TouchableOpacity style={styles.button} onPress={handlePickStock}>
+          <Text style={styles.buttonText}>Pick Stock</Text>
         </TouchableOpacity>
       </View>
 
@@ -209,7 +229,7 @@ const InventoryScreen = ({ navigation }) => {
           </View>
         </View>
       </Modal>
-    
+
       <Modal
         animationType="slide"
         transparent={true}
@@ -238,6 +258,35 @@ const InventoryScreen = ({ navigation }) => {
               onChangeText={setQuantity}
             />
             <Button title="Update" onPress={handleUpdateItem} />
+          </View>
+        </View>
+      </Modal>
+
+      {/* Pick Stock Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={pickStockModalVisible}
+        onRequestClose={() => setPickStockModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Pick Stock</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter Quantity"
+              keyboardType="numeric"
+              value={pickedQuantity}
+              onChangeText={text => setPickedQuantity(text)}
+            />
+            <View style={styles.modalButtonContainer}>
+              <TouchableOpacity style={styles.modalButton} onPress={confirmPickStock}>
+                <Text style={styles.modalButtonText}>Confirm</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.modalButton} onPress={() => setPickStockModalVisible(false)}>
+                <Text style={styles.modalButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -337,6 +386,21 @@ const styles = StyleSheet.create({
   },
   selectedItem: {
     backgroundColor: 'lightblue', // Example background color for selected item
+  },
+  modalButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  modalButton: {
+    backgroundColor: '#052560',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  modalButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
 
