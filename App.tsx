@@ -67,7 +67,7 @@ function MainApp({ userData }) {
           ),
         }}
       >
-        {(props) => <StockMovementScreen {...props} />}
+        {(props) => <StockMovementScreen {...props} userData={userData} />}
       </Tab.Screen>
       <Tab.Screen name="Delivere Items"
           options={{

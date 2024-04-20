@@ -19,7 +19,6 @@ app.use(express.json());
 // Use CORS middleware
 app.use(cors());
 
-
 // Routes Impirts
 require('./models/User')
 const User = mongoose.model('UserInfo')
@@ -33,7 +32,6 @@ const PickedStock = mongoose.model('PickedStock')
 
 require('./models/DeliveredStock')
 const DeliveredStock = mongoose.model('DeliveredStock')
-
 
 // // Use auth routes
 app.get('/', (req, res) => {
@@ -236,8 +234,69 @@ app.post('/add-delivered-stock', async (req, res) => {
   }
 });
 
+// Define route to fetch picked stock
+app.get('/picked-stock', async (req, res) => {
+  try {
+    const longPoll = req.query.longPoll === 'true';
 
+    if (longPoll) {
+      // Set a timeout to simulate long polling
+      setTimeout(async () => {
+        const pickedStock = await PickedStock.find();
+        res.json(pickedStock);
+      }, 10); // Polling interval: 10 milliseconds
+    } else {
+      // Normal request, respond immediately with the current data
+      const pickedStock = await PickedStock.find();
+      res.json(pickedStock);
+    }
+  } catch (error) {
+    console.error('Error fetching picked stock:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
+// Delete picked Stock
+
+app.delete('/picked-stock/:id', async (req, res) => {
+  const pickedStockId = req.params.id; // Get the ID of the picked stock item to delete
+
+  try {
+    // Find the picked stock item by ID and delete it
+    const deletedPickedStock = await PickedStock.findByIdAndDelete(pickedStockId);
+
+    if (!deletedPickedStock) {
+      return res.status(404).json({ message: 'Picked stock item not found' });
+    }
+
+    res.json({ message: 'Picked stock item deleted successfully', pickedStock: deletedPickedStock });
+  } catch (error) {
+    console.error('Error deleting picked stock item:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Define route to fetch delivered stock
+app.get('/delivered-stock', async (req, res) => {
+  try {
+    const longPoll = req.query.longPoll === 'true';
+
+    if (longPoll) {
+      // Set a timeout to simulate long polling
+      setTimeout(async () => {
+        const deliveredStock = await DeliveredStock.find();
+        res.json(deliveredStock);
+      }, 10); // Polling interval: 10 milliseconds
+    } else {
+      // Normal request, respond immediately with the current data
+      const deliveredStock = await DeliveredStock.find();
+      res.json(deliveredStock);
+    }
+  } catch (error) {
+    console.error('Error fetching delivered stock:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 // Function to get the IP address
 function getIPAddress() {

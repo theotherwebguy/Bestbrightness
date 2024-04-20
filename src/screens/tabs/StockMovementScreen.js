@@ -1,10 +1,93 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import axios from 'axios';
 
-const StockMovementScreen = () => {
+const StockMovementScreen = ({ userData }) => {
+  const [pickedStock, setPickedStock] = useState([]);
+  const [selectedItems, setSelectedItems] = useState([]);
+
+  useEffect(() => {
+    const intervalId = setInterval(fetchPickedStock, 10); // Poll every 5 seconds
+    return () => clearInterval(intervalId);
+  }, []);
+
+  const fetchPickedStock = async () => {
+    try {
+      const response = await axios.get('http://192.168.0.1:3000/picked-stock?longPoll=true');
+      setPickedStock(response.data.filter(item => item.loggedUserID === userData.id));
+    } catch (error) {
+      console.error('Error fetching picked stock:', error);
+      // Handle error
+    }
+  };
+
+  const handleSelectItem = (item) => {
+    const isSelected = selectedItems.some((selectedItem) => selectedItem._id === item._id);
+    if (isSelected) {
+      setSelectedItems((prevSelectedItems) => prevSelectedItems.filter((selectedItem) => selectedItem._id !== item._id));
+    } else {
+      setSelectedItems((prevSelectedItems) => [...prevSelectedItems, item]);
+    }
+  };
+
+  const handleDeliver = async () => {
+    try {
+      // Transform selected items into an array of objects matching the schema
+      const deliveredItems = selectedItems.map((item) => ({
+        productID: item.productID,
+        loggedUserID: userData.id,
+        role: userData.role,
+        deliveredQuantity: item.pickedQuantity,
+        stockEnteredTime: new Date(),
+        pickedUpTime: item.pickupTime,
+        deliveredTime: new Date(), // Assuming delivered time is current time
+      }));
+  
+      // Send a POST request to the '/delivered-stock' route with the selected items
+      await axios.post('http://192.168.0.1:3000/add-delivered-stock', deliveredItems);
+  
+      // Delete delivered items from the PickerStock database collection
+      await Promise.all(selectedItems.map(async (item) => {
+        await axios.delete(`http://192.168.0.1:3000/picked-stock/${item._id}`);
+      }));
+  
+      // Clear selected items after delivery
+      setSelectedItems([]);
+    } catch (error) {
+      console.error('Error delivering stock:', error);
+      // Handle error
+    }
+  };
+  
+
+  const renderItem = ({ item }) => {
+    const isSelected = selectedItems.some((selectedItem) => selectedItem._id === item._id);
+    return (
+      <TouchableOpacity onPress={() => handleSelectItem(item)}>
+        <View style={[styles.item, isSelected ? {backgroundColor: '#ADD8E6'} : null]}>
+          <Text style={styles.title}>{item.title}</Text>
+          <Text style={styles.description}>{item.description}</Text>
+          <Text style={styles.quantity}> Quantity: {item.pickedQuantity}</Text>
+          <Text style={styles.pickedTime}>Picked Time: {item.pickupTime}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+  
+
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Default Screen</Text>
+      <Text style={styles.text}>Hi: {userData.name} Pick Item for Delivery</Text>
+      <FlatList
+        data={pickedStock}
+        renderItem={renderItem}
+        keyExtractor={(item) => item._id} 
+        style={styles.flatList}
+        contentContainerStyle={styles.flatListContent}
+      />
+      <TouchableOpacity style={styles.button} onPress={handleDeliver}>
+        <Text style={styles.buttonText}>Deliver</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -14,10 +97,53 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 20,
   },
   text: {
     fontSize: 24,
     fontWeight: 'bold',
+    marginBottom: 30,
+  },
+  item: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  description: {
+    fontSize: 16,
+  },
+  quantity: {
+    fontSize: 16,
+  },
+  pickedTime: {
+    fontSize: 16,
+  },
+  flatList: {
+    width: '100%',
+  },
+  flatListContent: {
+    paddingHorizontal: 10,
+  },
+  button: {
+    width: '80%',
+    height: 40,
+    backgroundColor: '#052560',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 5,
+    marginVertical: 10,
+  },
+  buttonText: {
+    color: '#ffffff',
+    fontSize: 18,
   },
 });
 

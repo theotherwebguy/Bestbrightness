@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   button: {
-    width: '40%',
+    width: '80%',
     height: 40,
     backgroundColor: '#052560',
     justifyContent: 'center',
@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#ffffff',
-    fontSize: 16,
+    fontSize: 18,
   },
   item: {
     marginBottom: 10,
