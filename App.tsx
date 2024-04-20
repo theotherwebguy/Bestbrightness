@@ -42,15 +42,20 @@ function MainApp({ userData }) {
           }}>
         {(props) => <DashboardScreen {...props} userData={userData} />}
       </Tab.Screen>
-      <Tab.Screen name="Inventory" 
-            options={{
-            tabBarIcon: ({ color, size }) => (
-              <Image
-                source={require('C:/Users/NdlelaM/Documents/App/Bestbrightness/assets/inventory_icon.png')}
-                style={{ tintColor: color, width: size, height: size }}
-              />
-            ),
-          }} component={InventoryScreen} />
+      <Tab.Screen 
+        name="Inventory" 
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Image
+              source={require('C:/Users/NdlelaM/Documents/App/Bestbrightness/assets/inventory_icon.png')}
+              style={{ tintColor: color, width: size, height: size }}
+            />
+          ),
+        }} 
+      >
+        {(props) => <InventoryScreen {...props} userData={userData} />}
+      </Tab.Screen>
+
       <Tab.Screen 
         name="Stock Movement" 
         options={{

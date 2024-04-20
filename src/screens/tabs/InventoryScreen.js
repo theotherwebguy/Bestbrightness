@@ -1,12 +1,13 @@
-// Import useState, useEffect, useRef, Modal, TextInput, and Button
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, Button, FlatList, TouchableOpacity, StyleSheet, Modal, TextInput, Dimensions } from 'react-native';
 import axios from 'axios';
 import { Swipeable } from 'react-native-gesture-handler';
 import StockMovementScreen from './StockMovementScreen';
+import { IconButton } from 'react-native-paper';
+
 const { width } = Dimensions.get('window');
 
-const InventoryScreen = ({ navigation }) => {
+const InventoryScreen = ({ navigation, userData }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [updateModalVisible, setUpdateModalVisible] = useState(false);
   const [title, setTitle] = useState('');
@@ -16,148 +17,151 @@ const InventoryScreen = ({ navigation }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const flatListRef = useRef(null);
 
-  // New state variable to track selected items
   const [selectedItems, setSelectedItems] = useState([]);
-
-  // New state variables for pick stock modal
   const [pickStockModalVisible, setPickStockModalVisible] = useState(false);
   const [pickedQuantity, setPickedQuantity] = useState('');
 
-  // useEffect hook to fetch products
+  const loggedInUserID = userData.id
+  const role = userData && userData.role
+
+  const PickedStock = require('../../../backend/models/PickedStock');
+
   useEffect(() => {
     fetchProducts();
-
     return () => {
       setSelectedItems([]);
     };
   }, []);
 
-  // Function to fetch products
+  // Fetch Products from DB
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('http://172.20.208.1:3000/products');
+      const response = await axios.get('http://192.168.0.1:3000/products');
       setProducts(response.data);
     } catch (error) {
       console.error('Error fetching products:', error);
     }
   };
 
-  // Function to handle adding new item
+  // Function to add new items
   const handleAddNewItem = async () => {
-    const enteredTime = new Date(); // Get current time
-
+    const enteredTime = new Date();
     try {
-      const response = await axios.post('http://172.20.208.1:3000/add-product', {
+      const response = await axios.post('http://192.168.0.1:3000/add-product', {
         title,
         description,
         quantity: parseInt(quantity),
         enteredTime,
       });
-
       console.log('Product added successfully:', response.data);
       setModalVisible(false);
       setTitle('');
       setDescription('');
       setQuantity('');
-      fetchProducts(); // Refresh products list
+      fetchProducts();
     } catch (error) {
       console.error('Error adding product:', error);
     }
   };
 
-  // Function to handle updating item
+  // Function to update Product
   const handleUpdateItem = async () => {
     if (!selectedProduct) return;
-
     try {
-      const response = await axios.put(`http://172.20.208.1:3000/products/${selectedProduct._id}`, {
+      const response = await axios.put(`http://192.168.0.1:3000/products/${selectedProduct._id}`, {
         title,
         description,
-        quantity,
+        quantity: parseInt(quantity),
       });
-
       console.log('Product updated successfully:', response.data);
       setUpdateModalVisible(false);
-      fetchProducts(); // Refresh products list
+      fetchProducts();
     } catch (error) {
       console.error('Error updating product:', error);
     }
   };
 
-  // Function to handle deleting item
+  // Function to Delete a product
   const handleDeleteItem = async (productId) => {
     try {
-      await axios.delete(`http://172.20.208.1:3000/products/${productId}`);
+      await axios.delete(`http://192.168.0.1:3000/products/${productId}`);
       console.log('Product deleted successfully:', productId);
-      fetchProducts(); // Refresh products list
+      fetchProducts();
     } catch (error) {
       console.error('Error deleting product:', error);
     }
   };
 
-  // Function to handle selecting items
+  // Function to select a product
   const handleSelectItem = (item) => {
-    // Check if the item is already selected
     const isSelected = selectedItems.some((selectedItem) => selectedItem._id === item._id);
-
     if (isSelected) {
-      // If item is already selected, remove it from the selected items
       setSelectedItems((prevSelectedItems) => prevSelectedItems.filter((selectedItem) => selectedItem._id !== item._id));
     } else {
-      // If item is not selected, add it to the selected items
       setSelectedItems((prevSelectedItems) => [...prevSelectedItems, item]);
     }
   };
 
-  // Function to handle picking stock
-  const handlePickStock = async () => {
-    // Update pickup time for each selected item
-    selectedItems.forEach(async (item) => {
-      try {
-        const currentTime = new Date();
-        await axios.put(`http://172.20.208.1:3000/products/${item._id}`, {
-          pickupTime: currentTime,
-        });
-      } catch (error) {
-        console.error('Error updating pickup time:', error);
-      }
-    });
-
-    // Show pick stock modal
-    setPickStockModalVisible(true);
-  };
-
-  // Function to confirm picking stock
-  const confirmPickStock = async () => {
-    // Check if picked quantity is greater than available stock
-    const totalAvailableStock = selectedItems.reduce((total, item) => total + item.quantity, 0);
-    if (pickedQuantity > totalAvailableStock) {
-      // Notify user and return
-      alert("Entered quantity exceeds available stock. Please enter a number below or equal to the available stock.");
-      return;
-    }
-  
-    // Update quantity in the database
+ // Function to pick stock
+ const handlePickStock = async (loggedInUserID, role) => {
+  console.log('Slected Item Data: ', loggedInUserID);
+  console.log('Total Available Stock:', role); // Log the total available stock
+  selectedItems.forEach(async (item) => {
     try {
-      // Iterate through selected items and update the quantity
-      for (const item of selectedItems) {
-        const updatedQuantity = item.quantity - pickedQuantity;
-        await axios.put(`http://172.20.208.1:3000/products/${item._id}`, {
-          quantity: updatedQuantity,
-        });
-      }
-      // Refresh products list
-      fetchProducts();
-      // Navigate to StockMovementScreen with updated selectedItems data
-      navigation.navigate('Stock Movement', { selectedItems });
-      // Close the modal
-      setPickStockModalVisible(false);
+      // Call the route to add picked stock
+      await axios.post('http://192.168.0.1:3000/add-picked-stock', {
+        title: item.title,
+        description: item.description,
+        productID: item._id,
+        loggedUserID: loggedInUserID,
+        role: role,
+        pickedQuantity: pickedQuantity
+      });
     } catch (error) {
-      console.error('Error updating quantity:', error);
+      console.error('Error adding picked stock:', error);
     }
-  };
+  });
 
-  // Function to render each item
+  // Do not navigate to Stock Movement screen
+  setPickStockModalVisible(false);
+};
+
+// Function to confirmStock quantity
+const confirmPickStock = async (loggedInUserID, role) => {
+
+   // Ensure that at least one item is selected
+   if (selectedItems.length === 0) {
+    alert("Please select at least one item.");
+    return;
+  }
+
+  // Function to select all items before picking stock
+  selectedItems.forEach((item) => {
+    handleSelectItem(item); // Call handleSelectItem to ensure all items are selected
+  });
+
+
+  const totalAvailableStock = selectedItems.reduce((total, item) => total + item.quantity, 0);
+
+  
+  if (pickedQuantity > totalAvailableStock) {
+    alert("Entered quantity exceeds available stock. Please enter a number below or equal to the available stock.");
+    return;
+  }
+  try {
+    for (const item of selectedItems) {
+      const updatedQuantity = item.quantity - pickedQuantity;
+      await axios.put(`http://192.168.0.1:3000/products/${item._id}`, {
+        quantity: updatedQuantity,
+      });
+    }
+    fetchProducts();
+    handlePickStock(loggedInUserID, role); // Call handlePickStock to save the selected stock data
+  } catch (error) {
+    console.error('Error updating quantity:', error);
+  }
+};
+
   const renderItem = ({ item }) => (
     <Swipeable
       renderLeftActions={() => (
@@ -174,15 +178,27 @@ const InventoryScreen = ({ navigation }) => {
         </TouchableOpacity>
       )}
     >
-      <TouchableOpacity
-        style={[styles.item, selectedItems.some((selectedItem) => selectedItem._id === item._id) && styles.selectedItem]}
-        onPress={() => handleSelectItem(item)}
-        activeOpacity={0.8}
-      >
-        <Text style={styles.title}>{item.title}</Text>
-        <Text style={styles.description}>{item.description}</Text>
-        <Text style={styles.quantity}>Quantity: {item.quantity}</Text>
-      </TouchableOpacity>
+      <View style={[styles.itemContainer, selectedItems.some((selectedItem) => selectedItem._id === item._id) && styles.selectedItem]}>
+        <View style={styles.itemDetails}>
+          <TouchableOpacity
+            style={[styles.item]}
+            onPress={() => handleSelectItem(item)}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.title}>{item.title}</Text>
+            <Text style={styles.description}>{item.description}</Text>
+            <Text style={styles.quantity}>Quantity: {item.quantity}</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.plusIconContainer}>
+          <IconButton
+            icon="plus"
+            color="#052560"
+            size={24}
+            onPress={() => setPickStockModalVisible(true)}
+          />
+        </View>
+      </View>
     </Swipeable>
   );
 
@@ -193,9 +209,6 @@ const InventoryScreen = ({ navigation }) => {
           <Text style={styles.buttonText}>Add New</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.button} onPress={handlePickStock}>
-          <Text style={styles.buttonText}>Pick Stock</Text>
-        </TouchableOpacity>
       </View>
 
       <FlatList
@@ -269,7 +282,6 @@ const InventoryScreen = ({ navigation }) => {
         </View>
       </Modal>
 
-      {/* Pick Stock Modal */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -287,7 +299,7 @@ const InventoryScreen = ({ navigation }) => {
               onChangeText={text => setPickedQuantity(text)}
             />
             <View style={styles.modalButtonContainer}>
-              <TouchableOpacity style={styles.modalButton} onPress={confirmPickStock}>
+              <TouchableOpacity style={styles.modalButton} onPress={() => confirmPickStock(loggedInUserID, role)}>
                 <Text style={styles.modalButtonText}>Confirm</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.modalButton} onPress={() => setPickStockModalVisible(false)}>
@@ -327,9 +339,6 @@ const styles = StyleSheet.create({
   item: {
     marginBottom: 10,
     padding: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
   },
   title: {
     fontSize: 18,
@@ -392,7 +401,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   selectedItem: {
-    backgroundColor: 'lightblue', // Example background color for selected item
+    backgroundColor: 'lightblue',
   },
   modalButtonContainer: {
     flexDirection: 'row',
@@ -408,6 +417,22 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  itemContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+  },
+  itemDetails: {
+    width: '80%',
+  },
+  plusIconContainer: {
+    width: '20%',
+    alignItems: 'center',
   },
 });
 

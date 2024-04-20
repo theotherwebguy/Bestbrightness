@@ -9,7 +9,7 @@ const LoginScreen = ({ navigation, setIsLoggedIn, setUserData }) => {
   const handleLogin = async () => {
     try {
       // Send a POST request to the backend API with username and password
-      const response = await axios.post('http://172.20.208.1:3000/login', {
+      const response = await axios.post('http://192.168.0.1:3000/login', {
         username,
         password,
       });
@@ -17,19 +17,18 @@ const LoginScreen = ({ navigation, setIsLoggedIn, setUserData }) => {
       // Check if login was successful
       if (response.status === 200) {
         // Extract user data from the response
-        const { id, name, surname } = response.data.user;
-
+        const { id, name, surname, role } = response.data.user;
+        
+        console.log('User Data Role:', role );
         // Set user data in state
-        setUserData({ id, name, surname });
+        setUserData({ id, name, surname, role });
 
         // Set isLoggedIn to true upon successful login
         setIsLoggedIn(true);
         
         // Log all user information extracted
-        console.log('User Data:', { id, name, surname });
+        console.log('User Data:', { id, name, surname,role });
 
-        // Navigate to the desired screen
-        // navigation.navigate('TabbedDashboard');
       } else {
         
         Alert.alert('Error', response.data.message || 'Failed to login. Please try again.');

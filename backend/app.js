@@ -20,9 +20,20 @@ app.use(express.json());
 app.use(cors());
 
 
-// register API
+// Routes Impirts
 require('./models/User')
 const User = mongoose.model('UserInfo')
+
+
+require('./models/Product')
+const Product = mongoose.model('Product')
+
+require('./models/PickedStock');
+const PickedStock = mongoose.model('PickedStock')
+
+require('./models/DeliveredStock')
+const DeliveredStock = mongoose.model('DeliveredStock')
+
 
 // // Use auth routes
 app.get('/', (req, res) => {
@@ -52,10 +63,7 @@ app.post('/register', async (req, res) => {
   }
 });
 
-
-
 // Define login route
-
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
@@ -83,22 +91,19 @@ app.post('/login', async (req, res) => {
         username: user.username,
         name: user.name,
         surname: user.surname,
+        role: user.role,
+
       } 
     });
 
     // Log the user data
-    console.log('User Data:', user.name);
+    console.log('User Data Backend:', user.role);
 
   } catch (error) {
     console.error('Error logging in:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
-
-// add new product route
-require('./models/Product')
-const Product = mongoose.model('Product')
-
 
 // Define add product route
 app.post('/add-product', async (req, res) => {
@@ -198,6 +203,39 @@ app.delete('/products/:id', async (req, res) => {
       res.status(500).json({ message: 'Server error' });
   }
 });
+
+// Define route to add picked stock
+app.post('/add-picked-stock', async (req, res) => {
+  const { title, description, productID, loggedUserID, role, pickedQuantity } = req.body;
+
+  try {
+    // Create new picked stock entry
+    const newPickedStock = new PickedStock({ title, description, productID, loggedUserID, role, pickedQuantity });
+    await newPickedStock.save();
+
+    res.status(201).json({ message: 'Picked stock added successfully' });
+  } catch (error) {
+    console.error('Error adding picked stock:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Define route to add delivered stock
+app.post('/add-delivered-stock', async (req, res) => {
+  const { productID, loggedUserID, role, deliveredQuantity } = req.body;
+
+  try {
+    // Create new delivered stock entry
+    const newDeliveredStock = new DeliveredStock({ productID, loggedUserID, role, deliveredQuantity });
+    await newDeliveredStock.save();
+
+    res.status(201).json({ message: 'Delivered stock added successfully' });
+  } catch (error) {
+    console.error('Error adding delivered stock:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 
 
 
