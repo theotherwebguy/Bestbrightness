@@ -137,7 +137,8 @@ const InventoryScreen = ({ navigation, userData }) => {
         productID: item._id,
         loggedUserID: loggedInUserID,
         role: role,
-        pickedQuantity: pickedQuantity
+        pickedQuantity: pickedQuantity,
+        pickupTime: new Date(),
       });
     } catch (error) {
       console.error('Error adding picked stock:', error);

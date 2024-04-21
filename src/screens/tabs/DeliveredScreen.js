@@ -26,6 +26,7 @@ const DeliveredScreen = ({ userData }) => {
       <Text style={styles.title}>{item.title}</Text>
       <Text style={styles.description}>{item.description}</Text>
       <Text style={styles.quantity}>Quantity: {item.deliveredQuantity}</Text>
+      <Text style={styles.time}>Pickup Time: {item.stockEnteredTime}</Text>
       <Text style={styles.time}>Delivered Time: {item.deliveredTime}</Text>
     </View>
   );

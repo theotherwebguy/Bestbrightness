@@ -204,7 +204,7 @@ app.delete('/products/:id', async (req, res) => {
 
 // Define route to add picked stock
 app.post('/add-picked-stock', async (req, res) => {
-  const { title, description, productID, loggedUserID, role, pickedQuantity } = req.body;
+  const { title, description, productID, loggedUserID, role, pickedQuantity, pickupTime } = req.body;
 
   try {
     // Create new picked stock entry
