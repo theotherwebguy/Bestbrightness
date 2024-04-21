@@ -7,13 +7,13 @@ const StockMovementScreen = ({ userData }) => {
   const [selectedItems, setSelectedItems] = useState([]);
 
   useEffect(() => {
-    const intervalId = setInterval(fetchPickedStock, 10); // Poll every 5 seconds
+    const intervalId = setInterval(fetchPickedStock, 3000); // Poll every 5 seconds
     return () => clearInterval(intervalId);
   }, []);
 
   const fetchPickedStock = async () => {
     try {
-      const response = await axios.get('http://192.168.0.1:3000/picked-stock?longPoll=true');
+      const response = await axios.get('http://192.168.240.1:3000/picked-stock?longPoll=true');
       setPickedStock(response.data.filter(item => item.loggedUserID === userData.id));
     } catch (error) {
       console.error('Error fetching picked stock:', error);
@@ -30,25 +30,30 @@ const StockMovementScreen = ({ userData }) => {
     }
   };
 
+  // Function to Deliver picked items
   const handleDeliver = async () => {
     try {
-      // Transform selected items into an array of objects matching the schema
-      const deliveredItems = selectedItems.map((item) => ({
-        productID: item.productID,
-        loggedUserID: userData.id,
-        role: userData.role,
-        deliveredQuantity: item.pickedQuantity,
-        stockEnteredTime: new Date(),
-        pickedUpTime: item.pickupTime,
-        deliveredTime: new Date(), // Assuming delivered time is current time
+      // Add each selected item one by one
+      await Promise.all(selectedItems.map(async (item) => {
+        // Transform the item into an object matching the schema
+        const deliveredItem = {
+          productID: item.productID,
+          loggedUserID: userData.id,
+          role: userData.role,
+          deliveredQuantity: item.pickedQuantity,
+          stockEnteredTime: new Date(),
+          pickedUpTime: item.pickupTime,
+          deliveredTime: new Date(), // Assuming delivered time is current time
+        };
+  
+        // Send a POST request to add the item
+        await axios.post('http://192.168.240.1:3000/add-delivered-stock', deliveredItem);
       }));
   
-      // Send a POST request to the '/delivered-stock' route with the selected items
-      await axios.post('http://192.168.0.1:3000/add-delivered-stock', deliveredItems);
-  
-      // Delete delivered items from the PickerStock database collection
+      // Delete each selected item one by one
       await Promise.all(selectedItems.map(async (item) => {
-        await axios.delete(`http://192.168.0.1:3000/picked-stock/${item._id}`);
+        // Send a DELETE request to delete the item
+        await axios.delete(`http://192.168.240.1:3000/picked-stock/${item._id}`);
       }));
   
       // Clear selected items after delivery
@@ -58,6 +63,7 @@ const StockMovementScreen = ({ userData }) => {
       // Handle error
     }
   };
+  
   
 
   const renderItem = ({ item }) => {
