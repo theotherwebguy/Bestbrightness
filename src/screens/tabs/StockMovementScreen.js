@@ -32,19 +32,26 @@ const StockMovementScreen = ({ userData }) => {
 
   // Function to Deliver picked items
   const handleDeliver = async () => {
+
+    console.log('Selected Item Data:',selectedItems);
+
     try {
       // Add each selected item one by one
       await Promise.all(selectedItems.map(async (item) => {
         // Transform the item into an object matching the schema
         const deliveredItem = {
+          title: item.title,
+          description: item.description,
           productID: item.productID,
           loggedUserID: userData.id,
           role: userData.role,
           deliveredQuantity: item.pickedQuantity,
-          stockEnteredTime: new Date(),
+          stockEnteredTime: item.enteredTime,
           pickedUpTime: item.pickupTime,
           deliveredTime: new Date(), // Assuming delivered time is current time
         };
+
+        console.log('Selected Item Data:',deliveredItem);
   
         // Send a POST request to add the item
         await axios.post('http://192.168.240.1:3000/add-delivered-stock', deliveredItem);

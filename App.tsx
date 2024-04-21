@@ -69,16 +69,19 @@ function MainApp({ userData }) {
       >
         {(props) => <StockMovementScreen {...props} userData={userData} />}
       </Tab.Screen>
-      <Tab.Screen name="Delivere Items"
-          options={{
-            tabBarIcon: ({ color, size }) => (
-              <Image
-                source={require('C:/Users/NdlelaM/Documents/App/Bestbrightness/assets/delivered_items_icon.png')}
-                style={{ tintColor: color, width: size, height: size }}
-              />
-            ),
-          }}
-       component={DeliveredScreen} />
+      <Tab.Screen 
+        name="Delivere Items"
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Image
+              source={require('C:/Users/NdlelaM/Documents/App/Bestbrightness/assets/delivered_items_icon.png')}
+              style={{ tintColor: color, width: size, height: size }}
+            />
+          ),
+        }}
+      >
+        {(props) => <DeliveredScreen {...props} userData={userData} />}
+      </Tab.Screen>
     </Tab.Navigator>
   );
 }

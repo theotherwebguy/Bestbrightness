@@ -220,11 +220,11 @@ app.post('/add-picked-stock', async (req, res) => {
 
 // Define route to add delivered stock
 app.post('/add-delivered-stock', async (req, res) => {
-  const { productID, loggedUserID, role, deliveredQuantity } = req.body;
+  const {title,description, productID, loggedUserID, role, deliveredQuantity } = req.body;
 
   try {
     // Create new delivered stock entry
-    const newDeliveredStock = new DeliveredStock({ productID, loggedUserID, role, deliveredQuantity });
+    const newDeliveredStock = new DeliveredStock({title,description, productID, loggedUserID, role, deliveredQuantity });
     await newDeliveredStock.save();
 
     res.status(201).json({ message: 'Delivered stock added successfully' });
