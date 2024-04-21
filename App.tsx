@@ -28,20 +28,11 @@ function AuthStack({ setIsLoggedIn, setUserData }:
   );
 }
 
-function MainApp({ userData }) {
+ function MainApp({ userData }) {
+
   return (
     <Tab.Navigator>
-      <Tab.Screen name="Dashboard"              
-            options={{
-            tabBarIcon: ({ color, size }) => (
-              <Image
-                source={require('C:/Users/NdlelaM/Documents/App/Bestbrightness/assets/dashboard_icon.png')}
-                style={{ tintColor: color, width: size, height: size }}
-              />
-            ),
-          }}>
-        {(props) => <DashboardScreen {...props} userData={userData} />}
-      </Tab.Screen>
+
       <Tab.Screen 
         name="Inventory" 
         options={{
@@ -70,7 +61,7 @@ function MainApp({ userData }) {
         {(props) => <StockMovementScreen {...props} userData={userData} />}
       </Tab.Screen>
       <Tab.Screen 
-        name="Delivere Items"
+        name="Delivered Items"
         options={{
           tabBarIcon: ({ color, size }) => (
             <Image
@@ -86,6 +77,7 @@ function MainApp({ userData }) {
   );
 }
 
+
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState(null);
@@ -94,7 +86,7 @@ function App() {
     <GestureHandlerRootView>
       <NavigationContainer>
         {isLoggedIn ? (
-          <MainApp userData={userData} />
+          <MainApp userData={userData}  />
         ) : (
           <AuthStack setIsLoggedIn={setIsLoggedIn} setUserData={setUserData} />
         )}

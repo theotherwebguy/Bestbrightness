@@ -3,11 +3,13 @@ import { View, Text, Button, FlatList, TouchableOpacity, StyleSheet, Modal, Text
 import axios from 'axios';
 import { Swipeable } from 'react-native-gesture-handler';
 import StockMovementScreen from './StockMovementScreen';
+import DashboardScreen from './DashboardScreen';
 import { IconButton } from 'react-native-paper';
 
 const { width } = Dimensions.get('window');
 
 const InventoryScreen = ({ navigation, userData }) => {
+
   const [modalVisible, setModalVisible] = useState(false);
   const [updateModalVisible, setUpdateModalVisible] = useState(false);
   const [title, setTitle] = useState('');
@@ -16,34 +18,54 @@ const InventoryScreen = ({ navigation, userData }) => {
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const flatListRef = useRef(null);
-
   const [selectedItems, setSelectedItems] = useState([]);
   const [pickStockModalVisible, setPickStockModalVisible] = useState(false);
   const [pickedQuantity, setPickedQuantity] = useState('');
-
+  const [lowStockItems, setLowStockItems] = useState([]);
   const loggedInUserID = userData.id
   const role = userData && userData.role
 
-  const PickedStock = require('../../../backend/models/PickedStock');
 
   useEffect(() => {
     fetchProducts();
+    fetchProductsAndCalculateLowStock();
     return () => {
       setSelectedItems([]);
     };
   }, []);
 
+  
+  const fetchProductsAndCalculateLowStock = async () => {
+    try {
+      const response = await axios.get('http://192.168.240.1:3000/products');
+      const fetchedProducts = response.data;
+      setProducts(fetchedProducts);
+  
+      // Calculate low stock items
+      const lowStock = calculateLowStockItems(fetchedProducts);
+      console.log("Low Stock in Inventory:", lowStock);
+      setLowStockItems(lowStock);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
+  };
+
+    // Function to calculate low stock items
+    const calculateLowStockItems = (products) => {
+      // Define your threshold for low stock
+      const threshold = 50;
+      return products.filter(item => item.quantity < threshold);
+    };
+
   // Fetch Products from DB
-  const fetchProducts = async () => {
+  async function fetchProducts() {
     try {
       const response = await axios.get('http://192.168.240.1:3000/products');
       setProducts(response.data);
     } catch (error) {
       console.error('Error fetching products:', error);
     }
-  };
-
-  // Function to add new items
+  }
   const handleAddNewItem = async () => {
     const enteredTime = new Date();
     try {
@@ -201,7 +223,6 @@ const confirmPickStock = async (loggedInUserID, role) => {
       </View>
     </Swipeable>
   );
-
   return (
     <View style={styles.container}>
       <View style={styles.buttonContainer}>
@@ -217,6 +238,21 @@ const confirmPickStock = async (loggedInUserID, role) => {
         renderItem={renderItem}
         keyExtractor={(item, index) => index.toString()}
       />
+
+          {/* Display total stock */}
+    <View style={styles.totalStockContainer}>
+      <Text style={styles.totalStockText}>Total Stock: {products.reduce((total, item) => total + item.quantity, 0)}</Text>
+    </View>
+
+    {/* Display list of items with low stock */}
+    <View style={styles.lowStockContainer}>
+      <Text style={styles.lowStockTitle}>Items with Low Stock:</Text>
+      {lowStockItems.map((item) => (
+        <View key={item._id} style={styles.lowStockItem}>
+          <Text style={styles.lowstockfont}>{item.title}: {item.quantity}</Text>
+        </View>
+      ))}
+    </View>
 
       <Modal
         animationType="slide"
@@ -309,6 +345,7 @@ const confirmPickStock = async (loggedInUserID, role) => {
           </View>
         </View>
       </Modal>
+
     </View>
   );
 };
@@ -434,6 +471,33 @@ const styles = StyleSheet.create({
     width: '20%',
     alignItems: 'center',
   },
+  totalStockContainer: {
+    marginTop: 20,
+    alignItems: 'start',
+  },
+  totalStockText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  lowStockContainer: {
+    marginTop: 20,
+  },
+  lowStockTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  lowStockItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
+    
+  },
+  lowstockfont: {
+    fontSize:18,
+    color: 'red',
+    fontWeight: 'bold',
+  }
 });
 
 export default InventoryScreen;
