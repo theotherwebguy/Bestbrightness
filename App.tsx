@@ -38,7 +38,7 @@ function AuthStack({ setIsLoggedIn, setUserData }:
         options={{
           tabBarIcon: ({ color, size }) => (
             <Image
-              source={require('C:/Users/NdlelaM/Documents/App/Bestbrightness/assets/inventory_icon.png')}
+              source={require('C:/Users/NdlelaM/Documents/App1/Bestbrightness/assets/inventory_icon.png')}
               style={{ tintColor: color, width: size, height: size }}
             />
           ),
@@ -52,7 +52,7 @@ function AuthStack({ setIsLoggedIn, setUserData }:
         options={{
           tabBarIcon: ({ color, size }) => (
             <Image
-              source={require('C:/Users/NdlelaM/Documents/App/Bestbrightness/assets/stock_movement_icon.png')}
+              source={require('C:/Users/NdlelaM/Documents/App1/Bestbrightness/assets/stock_movement_icon.png')}
               style={{ tintColor: color, width: size, height: size }}
             />
           ),
@@ -65,7 +65,7 @@ function AuthStack({ setIsLoggedIn, setUserData }:
         options={{
           tabBarIcon: ({ color, size }) => (
             <Image
-              source={require('C:/Users/NdlelaM/Documents/App/Bestbrightness/assets/delivered_items_icon.png')}
+              source={require('C:/Users/NdlelaM/Documents/App1/Bestbrightness/assets/delivered_items_icon.png')}
               style={{ tintColor: color, width: size, height: size }}
             />
           ),

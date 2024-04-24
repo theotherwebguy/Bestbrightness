@@ -129,7 +129,7 @@ app.get('/products', async (req, res) => {
       setTimeout(async () => {
         const products = await Product.find();
         res.json(products);
-      }, 10); // Polling interval: 5 seconds
+      }, 5000); // Polling interval: 5 seconds
     } else {
       // Normal request, respond immediately with the current data
       const products = await Product.find();
@@ -244,7 +244,7 @@ app.get('/picked-stock', async (req, res) => {
       setTimeout(async () => {
         const pickedStock = await PickedStock.find();
         res.json(pickedStock);
-      }, 10); // Polling interval: 10 milliseconds
+      }, 3000); // Polling interval: 3 Seconds
     } else {
       // Normal request, respond immediately with the current data
       const pickedStock = await PickedStock.find();

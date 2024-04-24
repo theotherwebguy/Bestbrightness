@@ -37,7 +37,7 @@ const InventoryScreen = ({ navigation, userData }) => {
   
   const fetchProductsAndCalculateLowStock = async () => {
     try {
-      const response = await axios.get('http://192.168.240.1:3000/products');
+      const response = await axios.get('http:172.31.160.1:3000/products?longPoll=true');
       const fetchedProducts = response.data;
       setProducts(fetchedProducts);
   
@@ -60,7 +60,7 @@ const InventoryScreen = ({ navigation, userData }) => {
   // Fetch Products from DB
   async function fetchProducts() {
     try {
-      const response = await axios.get('http://192.168.240.1:3000/products');
+      const response = await axios.get('http:172.31.160.1:3000/products');
       setProducts(response.data);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -69,13 +69,13 @@ const InventoryScreen = ({ navigation, userData }) => {
   const handleAddNewItem = async () => {
     const enteredTime = new Date();
     try {
-      const response = await axios.post('http://192.168.240.1:3000/add-product', {
+      const response = await axios.post('http:172.31.160.1:3000/add-product', {
         title,
         description,
         quantity: parseInt(quantity),
         enteredTime,
       });
-      console.log('Product added successfully:', response.data);
+      
       setModalVisible(false);
       setTitle('');
       setDescription('');
@@ -90,7 +90,7 @@ const InventoryScreen = ({ navigation, userData }) => {
   const handleUpdateItem = async () => {
     if (!selectedProduct) return;
     try {
-      const response = await axios.put(`http://192.168.240.1:3000/products/${selectedProduct._id}`, {
+      const response = await axios.put(`http:172.31.160.1:3000/products/${selectedProduct._id}`, {
         title,
         description,
         quantity: parseInt(quantity),
@@ -98,6 +98,7 @@ const InventoryScreen = ({ navigation, userData }) => {
       console.log('Product updated successfully:', response.data);
       setUpdateModalVisible(false);
       fetchProducts();
+      fetchProductsAndCalculateLowStock();
     } catch (error) {
       console.error('Error updating product:', error);
     }
@@ -106,9 +107,10 @@ const InventoryScreen = ({ navigation, userData }) => {
   // Function to Delete a product
   const handleDeleteItem = async (productId) => {
     try {
-      await axios.delete(`http://192.168.240.1:3000/products/${productId}`);
+      await axios.delete(`http:172.31.160.1:3000/products/${productId}`);
       console.log('Product deleted successfully:', productId);
       fetchProducts();
+      fetchProductsAndCalculateLowStock();
     } catch (error) {
       console.error('Error deleting product:', error);
     }
@@ -126,12 +128,11 @@ const InventoryScreen = ({ navigation, userData }) => {
 
  // Function to pick stock
  const handlePickStock = async (loggedInUserID, role) => {
-  console.log('Slected Item Data: ', loggedInUserID);
-  console.log('Total Available Stock:', role); // Log the total available stock
+  
   selectedItems.forEach(async (item) => {
     try {
       // Call the route to add picked stock
-      await axios.post('http://192.168.240.1:3000/add-picked-stock', {
+      await axios.post('http:172.31.160.1:3000/add-picked-stock', {
         title: item.title,
         description: item.description,
         productID: item._id,
@@ -174,7 +175,7 @@ const confirmPickStock = async (loggedInUserID, role) => {
   try {
     for (const item of selectedItems) {
       const updatedQuantity = item.quantity - pickedQuantity;
-      await axios.put(`http://192.168.240.1:3000/products/${item._id}`, {
+      await axios.put(`http:172.31.160.1:3000/products/${item._id}`, {
         quantity: updatedQuantity,
       });
     }
