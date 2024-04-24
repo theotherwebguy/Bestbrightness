@@ -189,17 +189,19 @@ const confirmPickStock = async (loggedInUserID, role) => {
   const renderItem = ({ item }) => (
     <Swipeable
       renderLeftActions={() => (
+        role !== "Picker" ? // Check if the role is not "Picker"
         <TouchableOpacity style={styles.updateButton} onPress={() => {
           setSelectedProduct(item);
           setUpdateModalVisible(true);
         }}>
           <Text style={styles.updateButtonText}>Update</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> : null // Render null if the role is "Picker"
       )}
       renderRightActions={() => (
+        role !== "Picker" ? // Check if the role is not "Picker"
         <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteItem(item._id)}>
           <Text style={styles.deleteButtonText}>Delete</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> : null // Render null if the role is "Picker"
       )}
     >
       <View style={[styles.itemContainer, selectedItems.some((selectedItem) => selectedItem._id === item._id) && styles.selectedItem]}>
