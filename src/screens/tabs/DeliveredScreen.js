@@ -41,7 +41,6 @@ const DeliveredScreen = ({ userData }) => {
       console.error('Error printing slip:', error);
     }
   };
-  
 
   const generateSlipContent = () => {
     let html = `<html><body><h1>Delivered Stock Slip</h1>`;
@@ -72,7 +71,7 @@ const DeliveredScreen = ({ userData }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Hi {userData.name}, Delivered Stock</Text>
+      <Text style={styles.header}>Items you delivered</Text>
       <FlatList
         data={deliveredStock}
         renderItem={renderItem}

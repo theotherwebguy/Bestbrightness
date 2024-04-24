@@ -227,6 +227,7 @@ const confirmPickStock = async (loggedInUserID, role) => {
       </View>
     </Swipeable>
   );
+  
   return (
     <View style={styles.container}>
       <View style={styles.buttonContainer}>
