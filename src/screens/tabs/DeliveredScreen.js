@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import axios from 'axios';
-import * as Print from 'react-native-print';
+import Print from 'react-native-print';
 import RNHTMLtoPDF from 'react-native-html-to-pdf';
 
 const DeliveredScreen = ({ userData }) => {
@@ -11,6 +11,12 @@ const DeliveredScreen = ({ userData }) => {
   useEffect(() => {
     const intervalId = setInterval(fetchDeliveredStock, 3000); // Poll every 3 seconds
     return () => clearInterval(intervalId);
+
+    // Somewhere in your component or a test function:
+console.log(Print); // Check if Print object is accessible
+
+// Then, you can try accessing a method or property of the Print object
+
   }, []);
 
   const fetchDeliveredStock = async () => {
@@ -43,7 +49,8 @@ const DeliveredScreen = ({ userData }) => {
 
   const handlePrintSlip = async () => {
     const htmlContent = generateSlipContent();
-  
+    console.log(Print); // Check if Print object is accessible
+    console.log(Print.print);
     try {
       // Generate PDF from HTML content
       const { filePath } = await RNHTMLtoPDF.convert({
