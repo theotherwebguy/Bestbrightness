@@ -15,13 +15,30 @@ const DeliveredScreen = ({ userData }) => {
 
   const fetchDeliveredStock = async () => {
     try {
-      const response = await axios.get('http:172.31.160.1:3000/delivered-stock?longPoll=true');
+      const response = await axios.get('http:172.17.208.1:3000/delivered-stock?longPoll=true');
       const filteredData = response.data.filter(item => item.loggedUserID === userData.id);
       setDeliveredStock(filteredData);
     } catch (error) {
       console.error('Error fetching delivered stock:', error);
       // Handle error
     }
+  };
+
+  const generateSlipContent = () => {
+    let html = `<html><body><h1>Delivered Stock Slip</h1>`;
+    html += `<p>Name: ${userData.name}</p>`;
+    deliveredStock.forEach(item => {
+      html += `<div style="margin-bottom: 20px;">
+                <p><strong>Title:</strong> ${item.title}</p>
+                <p><strong>Description:</strong> ${item.description}</p>
+                <p><strong>Quantity:</strong> ${item.deliveredQuantity}</p>
+                <p><strong>Picked Up Time:</strong> ${item.pickupTime}</p>
+                <p><strong>Delivered Time:</strong> ${item.deliveredTime}</p>
+              </div>`;
+    });
+    html += `</body></html>`;
+    return html;
+    console.log(html);
   };
 
   const handlePrintSlip = async () => {
@@ -42,22 +59,6 @@ const DeliveredScreen = ({ userData }) => {
     }
   };
 
-  const generateSlipContent = () => {
-    let html = `<html><body><h1>Delivered Stock Slip</h1>`;
-    html += `<p>Name: ${userData.name}</p>`;
-    deliveredStock.forEach(item => {
-      html += `<div style="margin-bottom: 20px;">
-                <p><strong>Title:</strong> ${item.title}</p>
-                <p><strong>Description:</strong> ${item.description}</p>
-                <p><strong>Quantity:</strong> ${item.deliveredQuantity}</p>
-                <p><strong>Picked Up Time:</strong> ${item.pickupTime}</p>
-                <p><strong>Delivered Time:</strong> ${item.deliveredTime}</p>
-              </div>`;
-    });
-    html += `</body></html>`;
-    return html;
-    console.log(html);
-  };
 
   const renderItem = ({ item }) => (
     <View style={styles.item}>
