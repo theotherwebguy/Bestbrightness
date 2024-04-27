@@ -41,6 +41,7 @@ console.log(Print); // Check if Print object is accessible
                 <p><strong>Picked Up Time:</strong> ${item.pickupTime}</p>
                 <p><strong>Delivered Time:</strong> ${item.deliveredTime}</p>
               </div>`;
+              html += `<hr/>`;
     });
     html += `</body></html>`;
     return html;
