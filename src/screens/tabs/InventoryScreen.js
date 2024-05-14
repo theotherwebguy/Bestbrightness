@@ -37,7 +37,7 @@ const InventoryScreen = ({ navigation, userData }) => {
   
   const fetchProductsAndCalculateLowStock = async () => {
     try {
-      const response = await axios.get('http:172.17.208.1:3000/products?longPoll=true');
+      const response = await axios.get('http:192.168.208.1:3000/products?longPoll=true');
       const fetchedProducts = response.data;
       setProducts(fetchedProducts);
   
@@ -60,7 +60,7 @@ const InventoryScreen = ({ navigation, userData }) => {
   // Fetch Products from DB
   async function fetchProducts() {
     try {
-      const response = await axios.get('http:172.17.208.1:3000/products');
+      const response = await axios.get('http:192.168.208.1:3000/products');
       setProducts(response.data);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -70,7 +70,7 @@ const InventoryScreen = ({ navigation, userData }) => {
   const handleAddNewItem = async () => {
     const enteredTime = new Date();
     try {
-      const response = await axios.post('http:172.17.208.1:3000/add-product', {
+      const response = await axios.post('http:192.168.208.1:3000/add-product', {
         title,
         description,
         quantity: parseInt(quantity),
@@ -91,7 +91,7 @@ const InventoryScreen = ({ navigation, userData }) => {
   const handleUpdateItem = async () => {
     if (!selectedProduct) return;
     try {
-      const response = await axios.put(`http:172.17.208.1:3000/products/${selectedProduct._id}`, {
+      const response = await axios.put(`http:192.168.208.1:3000/products/${selectedProduct._id}`, {
         title,
         description,
         quantity: parseInt(quantity),
@@ -108,7 +108,7 @@ const InventoryScreen = ({ navigation, userData }) => {
   // Function to Delete a product
   const handleDeleteItem = async (productId) => {
     try {
-      await axios.delete(`http:172.17.208.1:3000/products/${productId}`);
+      await axios.delete(`http:192.168.208.1:3000/products/${productId}`);
       console.log('Product deleted successfully:', productId);
       fetchProducts();
       fetchProductsAndCalculateLowStock();
@@ -133,7 +133,7 @@ const InventoryScreen = ({ navigation, userData }) => {
   selectedItems.forEach(async (item) => {
     try {
       // Call the route to add picked stock
-      await axios.post('http:172.17.208.1:3000/add-picked-stock', {
+      await axios.post('http:192.168.208.1:3000/add-picked-stock', {
         title: item.title,
         description: item.description,
         productID: item._id,
@@ -176,7 +176,7 @@ const confirmPickStock = async (loggedInUserID, role) => {
   try {
     for (const item of selectedItems) {
       const updatedQuantity = item.quantity - pickedQuantity;
-      await axios.put(`http:172.17.208.1:3000/products/${item._id}`, {
+      await axios.put(`http:192.168.208.1:3000/products/${item._id}`, {
         quantity: updatedQuantity,
       });
     }
@@ -233,9 +233,11 @@ const confirmPickStock = async (loggedInUserID, role) => {
   return (
     <View style={styles.container}>
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={() => setModalVisible(true)}>
-          <Text style={styles.buttonText}>Add New</Text>
-        </TouchableOpacity>
+      {role !== "Picker" && (
+    <TouchableOpacity style={styles.button} onPress={() => setModalVisible(true)}>
+      <Text style={styles.buttonText}>Add New</Text>
+    </TouchableOpacity>
+  )}
 
       </View>
 

@@ -21,7 +21,7 @@ console.log(Print); // Check if Print object is accessible
 
   const fetchDeliveredStock = async () => {
     try {
-      const response = await axios.get('http:172.17.208.1:3000/delivered-stock?longPoll=true');
+      const response = await axios.get('http:192.168.208.1:3000/delivered-stock?longPoll=true');
       const filteredData = response.data.filter(item => item.loggedUserID === userData.id);
       setDeliveredStock(filteredData);
     } catch (error) {

@@ -8,8 +8,8 @@ const LoginScreen = ({ navigation, setIsLoggedIn, setUserData }) => {
 
   const handleLogin = async () => {
     try {
-      // Send a POST request to the backend API with username and password
-      const response = await axios.post('http:172.17.208.1:3000/login', {
+      // Send a POST request to the backend API wit++h username and password
+      const response = await axios.post('http:192.168.208.1:3000/login', {
         username,
         password,
       });
